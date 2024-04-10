@@ -20,9 +20,10 @@ variable "aws_key_pair_name" {
     default = "djoo-demo-ec2-keypair"
 }
 
-variable "pvt_key" {
-   type = 
-
+variable "deploy_ssh_private_key" {
+   type = string
+   description = ssh private key
+}
 variable "ec2_tags" {
   description = "Tags for EC2 instance"
   type        = map(string)
