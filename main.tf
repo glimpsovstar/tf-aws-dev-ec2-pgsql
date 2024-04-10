@@ -10,6 +10,12 @@ data "hcp_packer_artifact" "rhel8-pgsql_ap_southeast_2" {
   region              = "ap-southeast-2"
 }
 
+resource "local_file" "deploy_ssh_key" {
+  filename = "/tmp/id_rsa"
+  content = var.deploy_ssh_private_key
+  file_permission = 600
+}
+
 resource "aws_instance" "rhel-pgsql_instance" {
   ami           = data.hcp_packer_artifact.rhel8-pgsql_ap_southeast_2.external_identifier
   instance_type = var.instance_type
@@ -18,18 +24,12 @@ resource "aws_instance" "rhel-pgsql_instance" {
   tags          = var.ec2_tags
   vpc_security_group_ids = [data.terraform_remote_state.aws_dev_vpc.outputs.security_group-ssh_http_https_allowed] 
 
-resource "local_file" "deploy_ssh_key" {
-  filename = "/tmp/id_rsa
-  content = var.deploy_ssh_private_key
-  file_permission = 600
-}
-
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    command = "tr -d '\r' < /tmp/id_rsa > ~/id_rsa && chmod 0600 ~/id_rsa
-    
+    command = "tr -d '\r' < /tmp/id_rsa > ~/id_rsa && chmod 0600 ~/id_rsa"
+  }  
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -u ec2-user -i '${self.ipv4_address},' --private-key id_rsa pgsql-config.yml" 
+    command = "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -u ec2-user -i '${self.private_ip},' --private-key id_rsa pgsql-config.yml" 
   }
 
 }

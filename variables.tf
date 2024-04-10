@@ -22,8 +22,9 @@ variable "aws_key_pair_name" {
 
 variable "deploy_ssh_private_key" {
    type = string
-   description = ssh private key
+   description = "ssh private key"
 }
+
 variable "ec2_tags" {
   description = "Tags for EC2 instance"
   type        = map(string)
